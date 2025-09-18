@@ -1146,6 +1146,22 @@ IMPLEMENTING SUPPORT for ImGuiBackendFlags_RendererHasTextures:
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #include <stdint.h>     // intptr_t
 
+
+
+
+
+#undef NDEBUG
+
+#include "common/assert.h"
+
+#define TAG "imgui"
+
+
+
+
+
+
+
 // [Windows] On non-Visual Studio compilers, we default to IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS unless explicitly enabled
 #if defined(_WIN32) && !defined(_MSC_VER) && !defined(IMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS)
 #define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
@@ -1246,6 +1262,22 @@ static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 0.70f;    // Lock 
 static const ImVec2 TOOLTIP_DEFAULT_OFFSET_MOUSE = ImVec2(16, 10);      // Multiplied by g.Style.MouseCursorScale
 static const ImVec2 TOOLTIP_DEFAULT_OFFSET_TOUCH = ImVec2(0, -20);      // Multiplied by g.Style.MouseCursorScale
 static const ImVec2 TOOLTIP_DEFAULT_PIVOT_TOUCH = ImVec2(0.5f, 1.0f);   // Multiplied by g.Style.MouseCursorScale
+
+
+
+
+
+
+
+
+bool ImGuiLandscapeHack_isLandscape;
+
+
+
+
+
+
+
 
 //-------------------------------------------------------------------------
 // [SECTION] FORWARD DECLARATIONS
@@ -1405,15 +1437,15 @@ ImGuiStyle::ImGuiStyle()
     FramePadding                = ImVec2(4,3);      // Padding within a framed rectangle (used by most widgets)
     FrameRounding               = 0.0f;             // Radius of frame corners rounding. Set to 0.0f to have rectangular frames (used by most widgets).
     FrameBorderSize             = 0.0f;             // Thickness of border around frames. Generally set to 0.0f or 1.0f. Other values not well tested.
-    ItemSpacing                 = ImVec2(8,4);      // Horizontal and vertical spacing between widgets/lines
+    ItemSpacing                 = ImVec2(8,4); // change at runtime using DpToPixels      // Horizontal and vertical spacing between widgets/lines
     ItemInnerSpacing            = ImVec2(4,4);      // Horizontal and vertical spacing between within elements of a composed widget (e.g. a slider and its label)
     CellPadding                 = ImVec2(4,2);      // Padding within a table cell. Cellpadding.x is locked for entire table. CellPadding.y may be altered between different rows.
     TouchExtraPadding           = ImVec2(0,0);      // Expand reactive bounding box for touch-based system where touch position is not accurate enough. Unfortunately we don't sort widgets so priority on overlap will always be given to the first widget. So don't grow this too much!
     IndentSpacing               = 21.0f;            // Horizontal spacing when e.g. entering a tree node. Generally == (FontSize + FramePadding.x*2).
     ColumnsMinSpacing           = 6.0f;             // Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1).
-    ScrollbarSize               = 14.0f;            // Width of the vertical scrollbar, Height of the horizontal scrollbar
+    ScrollbarSize               = 14.0f; // change at runtime using DpToPixels            // Width of the vertical scrollbar, Height of the horizontal scrollbar
     ScrollbarRounding           = 9.0f;             // Radius of grab corners rounding for scrollbar
-    ScrollbarPadding            = 2.0f;             // Padding of scrollbar grab within its frame (same for both axises)
+    ScrollbarPadding            = 2.0f;             // Padding of scrollbar grab within its frame (same for both axes)
     GrabMinSize                 = 12.0f;            // Minimum width/height of a grab box for slider/scrollbar
     GrabRounding                = 0.0f;             // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
     LogSliderDeadzone           = 4.0f;             // The size in pixels of the dead-zone around zero on logarithmic sliders that cross zero.
@@ -6004,6 +6036,9 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
         text_display_end = text_end;
 
     ImFont* font = g.Font;
+
+    ASSERT(font != NULL);
+
     const float font_size = g.FontSize;
     if (text == text_display_end)
         return ImVec2(0.0f, font_size);
@@ -7604,6 +7639,12 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         // When clamping to stay visible, we will enforce that window->Pos stays inside of visibility_rect.
         ImRect viewport_rect(viewport->GetMainRect());
         ImRect viewport_work_rect(viewport->GetWorkRect());
+
+        if (ImGuiLandscapeHack_isLandscape) {
+            viewport_rect.Max = {viewport_rect.Max.y, viewport_rect.Max.x};
+            viewport_work_rect.Max = {viewport_work_rect.Max.y, viewport_work_rect.Max.x};
+        }
+
         ImVec2 visibility_padding = ImMax(style.DisplayWindowPadding, style.DisplaySafeAreaPadding);
         ImRect visibility_rect(viewport_work_rect.Min + visibility_padding, viewport_work_rect.Max - visibility_padding);
 

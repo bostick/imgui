@@ -180,6 +180,18 @@
 #include "imgui_impl_opengl3_loader.h"
 #endif
 
+
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#include "common/logging.h"
+
+
+#define TAG "imgui_impl_opengl3"
+
+
 // Vertex arrays are not supported on ES2/WebGL1 unless Emscripten which uses an extension
 #ifndef IMGUI_IMPL_OPENGL_ES2
 #define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
@@ -222,7 +234,7 @@
 //#define IMGUI_IMPL_OPENGL_DEBUG
 #ifdef IMGUI_IMPL_OPENGL_DEBUG
 #include <stdio.h>
-#define GL_CALL(_CALL)      do { _CALL; GLenum gl_err = glGetError(); if (gl_err != 0) fprintf(stderr, "GL error 0x%x returned from '%s'.\n", gl_err, #_CALL); } while (0)  // Call with error check
+#define GL_CALL(_CALL)      do { _CALL; GLenum gl_err = glGetError(); if (gl_err != 0) LOGE("GL error 0x%x returned from '%s'.\n", gl_err, #_CALL); } while (0)  // Call with error check
 #else
 #define GL_CALL(_CALL)      _CALL   // Call without error check
 #endif
@@ -294,7 +306,7 @@ bool ImGui_ImplOpenGL3_InitLoader()
 #ifdef IMGUI_IMPL_OPENGL_LOADER_IMGL3W
     if (glGetIntegerv == nullptr && imgl3wInit() != 0)
     {
-        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+        LOGE("Failed to initialize OpenGL loader!\n");
         return false;
     }
 #endif
@@ -491,16 +503,26 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 #if defined(GL_CLIP_ORIGIN)
     if (!clip_origin_lower_left) { float tmp = T; T = B; B = tmp; } // Swap top and bottom if origin is upper left
 #endif
-    const float ortho_projection[4][4] =
-    {
-        { 2.0f/(R-L),   0.0f,         0.0f,   0.0f },
-        { 0.0f,         2.0f/(T-B),   0.0f,   0.0f },
-        { 0.0f,         0.0f,        -1.0f,   0.0f },
-        { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
-    };
+
     glUseProgram(bd->ShaderHandle);
     glUniform1i(bd->AttribLocationTex, 0);
-    glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+
+
+    glm::mat4 ortho_projection;
+    ortho_projection = glm::ortho(L,
+                                  R,
+                                  B,
+                                  T,
+                                  -1.0f,
+                                  1.0f);
+
+    if (ImGuiLandscapeHack_isLandscape) {
+        ortho_projection = glm::rotate(ortho_projection, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ortho_projection = glm::translate(ortho_projection, glm::vec3(0.0, -R, 0.0f));
+    }
+
+    glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, glm::value_ptr(ortho_projection));
+
 
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
     if (bd->HasBindSampler)
@@ -652,7 +674,30 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
                     continue;
 
                 // Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-                GL_CALL(glScissor((int)clip_min.x, (int)((float)fb_height - clip_max.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y)));
+
+                GLint scissorX;
+                GLint scissorY;
+                GLint scissorWidth;
+                GLint scissorHeight;
+                if (ImGuiLandscapeHack_isLandscape) {
+
+                    scissorX = (int)clip_min.y;
+                    scissorY = (int)((float)fb_height - clip_max.x);
+                    scissorWidth = (int)(clip_max.y - clip_min.y);
+                    scissorHeight = (int)(clip_max.x - clip_min.x);
+
+                } else {
+                    //
+                    // portrait
+                    //
+
+                    scissorX = (int)clip_min.x;
+                    scissorY = (int)((float)fb_height - clip_max.y);
+                    scissorWidth = (int)(clip_max.x - clip_min.x);
+                    scissorHeight = (int)(clip_max.y - clip_min.y);
+                }
+
+                GL_CALL(glScissor(scissorX, scissorY, scissorWidth, scissorHeight));
 
                 // Bind texture, Draw
                 GL_CALL(glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->GetTexID()));
@@ -805,13 +850,13 @@ static bool CheckShader(GLuint handle, const char* desc)
     glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if ((GLboolean)status == GL_FALSE)
-        fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to compile %s! With GLSL: %s\n", desc, bd->GlslVersionString);
+        LOGE("ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to compile %s! With GLSL: %s\n", desc, bd->GlslVersionString);
     if (log_length > 1)
     {
         ImVector<char> buf;
         buf.resize((int)(log_length + 1));
         glGetShaderInfoLog(handle, log_length, nullptr, (GLchar*)buf.begin());
-        fprintf(stderr, "%s\n", buf.begin());
+        LOGE("%s\n", buf.begin());
     }
     return (GLboolean)status == GL_TRUE;
 }
@@ -824,13 +869,13 @@ static bool CheckProgram(GLuint handle, const char* desc)
     glGetProgramiv(handle, GL_LINK_STATUS, &status);
     glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if ((GLboolean)status == GL_FALSE)
-        fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to link %s! With GLSL %s\n", desc, bd->GlslVersionString);
+        LOGE("ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to link %s! With GLSL %s\n", desc, bd->GlslVersionString);
     if (log_length > 1)
     {
         ImVector<char> buf;
         buf.resize((int)(log_length + 1));
         glGetProgramInfoLog(handle, log_length, nullptr, (GLchar*)buf.begin());
-        fprintf(stderr, "%s\n", buf.begin());
+        LOGE("%s\n", buf.begin());
     }
     return (GLboolean)status == GL_TRUE;
 }
