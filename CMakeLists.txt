@@ -5,32 +5,38 @@ project(imgui)
 include(FetchContent)
 
 FetchContent_Declare(SDL3
-    GIT_REPOSITORY
-        https://github.com/bostick/box2d.git
-    GIT_TAG
-        milestone-8-branch
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/box2d.git
+    # GIT_TAG
+    #     milestone-8-branch
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_SDL_DIR}
 )
 FetchContent_MakeAvailable(SDL3)
 
 FetchContent_Declare(glm
-    GIT_REPOSITORY
-        https://github.com/bostick/glm.git
-    GIT_TAG
-        1.0.3
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/glm.git
+    # GIT_TAG
+    #     1.0.3
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_GLM_DIR}
 )
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(common
-    GIT_REPOSITORY
-        https://github.com/bostick/common.git
-    GIT_TAG
-        b0.8
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/common.git
+    # GIT_TAG
+    #     b0.8
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_COMMON_DIR}
 )
 FetchContent_MakeAvailable(common)
 
