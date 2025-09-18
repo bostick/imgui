@@ -4,33 +4,54 @@ project(imgui)
 
 include(FetchContent)
 
+
+if("${LOCAL_SDL_DIR}" STREQUAL "")
+    message(FATAL_ERROR "LOCAL_SDL_DIR is not set!")
+endif()
+
 FetchContent_Declare(SDL3
-    GIT_REPOSITORY
-        https://github.com/bostick/box2d.git
-    GIT_TAG
-        bostick-main
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/box2d.git
+    # GIT_TAG
+    #     bostick-main
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_SDL_DIR}
 )
 FetchContent_MakeAvailable(SDL3)
 
+
+if("${LOCAL_GLM_DIR}" STREQUAL "")
+    message(FATAL_ERROR "LOCAL_GLM_DIR is not set!")
+endif()
+
 FetchContent_Declare(glm
-    GIT_REPOSITORY
-        https://github.com/bostick/glm.git
-    GIT_TAG
-        1.0.3
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/glm.git
+    # GIT_TAG
+    #     1.0.3
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_GLM_DIR}
 )
 FetchContent_MakeAvailable(glm)
 
+
+if("${LOCAL_COMMON_DIR}" STREQUAL "")
+    message(FATAL_ERROR "LOCAL_COMMON_DIR is not set!")
+endif()
+
 FetchContent_Declare(common
-    GIT_REPOSITORY
-        https://github.com/bostick/common.git
-    GIT_TAG
-        main
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    # GIT_REPOSITORY
+    #     https://github.com/bostick/common.git
+    # GIT_TAG
+    #     main
+    # GIT_SHALLOW 1
+    # GIT_PROGRESS 1
+    SOURCE_DIR
+        ${LOCAL_COMMON_DIR}
 )
 FetchContent_MakeAvailable(common)
 
