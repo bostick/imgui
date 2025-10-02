@@ -927,7 +927,12 @@ bool ImGui::CloseButton(ImGuiID id, const ImVec2& pos)
     const ImU32 cross_col = GetColorU32(ImGuiCol_Text);
     const ImVec2 cross_center = bb.GetCenter() - ImVec2(0.5f, 0.5f);
     const float cross_extent = g.FontSize * 0.5f * 0.7071f - 1.0f;
-    const float cross_thickness = 1.0f * (float)(int)g.Style._MainScale; // FIXME-DPI
+
+    //
+    // BKB: the X close button was previously defined as 1 pixel wide and way too small.
+    //
+    const float cross_thickness = g.Style.CrossThickness * (float)(int)g.Style._MainScale;
+
     window->DrawList->AddLine(cross_center + ImVec2(+cross_extent, +cross_extent), cross_center + ImVec2(-cross_extent, -cross_extent), cross_col, cross_thickness);
     window->DrawList->AddLine(cross_center + ImVec2(+cross_extent, -cross_extent), cross_center + ImVec2(-cross_extent, +cross_extent), cross_col, cross_thickness);
 
