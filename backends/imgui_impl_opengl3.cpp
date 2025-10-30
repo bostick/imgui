@@ -182,6 +182,10 @@
 #endif
 
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 #include "common/logging.h"
 
 
@@ -504,16 +508,26 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 #if defined(GL_CLIP_ORIGIN)
     if (!clip_origin_lower_left) { float tmp = T; T = B; B = tmp; } // Swap top and bottom if origin is upper left
 #endif
-    const float ortho_projection[4][4] =
-    {
-        { 2.0f/(R-L),   0.0f,         0.0f,   0.0f },
-        { 0.0f,         2.0f/(T-B),   0.0f,   0.0f },
-        { 0.0f,         0.0f,        -1.0f,   0.0f },
-        { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
-    };
+
     glUseProgram(bd->ShaderHandle);
     glUniform1i(bd->AttribLocationTex, 0);
-    glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+
+
+    glm::mat4 ortho_projection;
+    ortho_projection = glm::ortho(L,
+                                  R,
+                                  B,
+                                  T,
+                                  -1.0f,
+                                  1.0f);
+
+    if (ImGuiLandscapeHack_isLandscape) {
+        ortho_projection = glm::rotate(ortho_projection, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ortho_projection = glm::translate(ortho_projection, glm::vec3(0.0, -R, 0.0f));
+    }
+
+    glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, glm::value_ptr(ortho_projection));
+
 
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
     if (bd->HasBindSampler)
@@ -665,7 +679,30 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
                     continue;
 
                 // Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-                GL_CALL(glScissor((int)clip_min.x, (int)((float)fb_height - clip_max.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y)));
+
+                GLint scissorX;
+                GLint scissorY;
+                GLint scissorWidth;
+                GLint scissorHeight;
+                if (ImGuiLandscapeHack_isLandscape) {
+
+                    scissorX = (int)clip_min.y;
+                    scissorY = (int)((float)fb_height - clip_max.x);
+                    scissorWidth = (int)(clip_max.y - clip_min.y);
+                    scissorHeight = (int)(clip_max.x - clip_min.x);
+
+                } else {
+                    //
+                    // portrait
+                    //
+
+                    scissorX = (int)clip_min.x;
+                    scissorY = (int)((float)fb_height - clip_max.y);
+                    scissorWidth = (int)(clip_max.x - clip_min.x);
+                    scissorHeight = (int)(clip_max.y - clip_min.y);
+                }
+
+                GL_CALL(glScissor(scissorX, scissorY, scissorWidth, scissorHeight));
 
                 // Bind texture, Draw
                 GL_CALL(glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->GetTexID()));
