@@ -14,6 +14,16 @@ FetchContent_Declare(SDL3
 )
 FetchContent_MakeAvailable(SDL3)
 
+FetchContent_Declare(common
+    GIT_REPOSITORY
+        https://github.com/bostick/common.git
+    GIT_TAG
+        main
+    GIT_SHALLOW 1
+    GIT_PROGRESS 1
+)
+FetchContent_MakeAvailable(common)
+
 
 set(SOURCES_LIB
     imgui.cpp
@@ -54,6 +64,7 @@ target_include_directories(imgui-lib
 target_link_libraries(imgui-lib
     PRIVATE
         SDL3::SDL3-static
+        common-lib
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
