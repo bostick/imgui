@@ -103,6 +103,20 @@
 #define SDLK_GRAVE SDLK_BACKQUOTE
 #endif
 
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#undef NDEBUG
+
+#include "common/abort.h"
+#include "common/logging.h"
+
+
+#define TAG "imgui_impl_sdl3"
+
+
 // SDL Data
 struct ImGui_ImplSDL3_Data
 {
@@ -389,7 +403,28 @@ bool ImGui_ImplSDL3_ProcessEvent(const SDL_Event* event)
         {
             if (ImGui_ImplSDL3_GetViewportForWindowID(event->motion.windowID) == nullptr)
                 return false;
-            ImVec2 mouse_pos((float)event->motion.x, (float)event->motion.y);
+
+            glm::vec4 mouse_pos_glm{ (float)event->motion.x, (float)event->motion.y, 0.0f, 1.0f };
+
+            int w;
+            int h;
+            if (!SDL_GetWindowSize(bd->Window, &w, &h)) {
+                ABORT("SDL_GetWindowSize failed");
+            }
+
+            if (ImGuiLandscapeHack_isLandscape) {
+
+                glm::mat4 rotationMat(1.0f);
+                glm::mat4 translationMat(1.0f);
+
+                rotationMat = glm::rotate(rotationMat, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                translationMat = glm::translate(translationMat, glm::vec3(0.0f, w, 0.0f));
+
+                mouse_pos_glm = translationMat * rotationMat * mouse_pos_glm;
+            }
+
+            ImVec2 mouse_pos(mouse_pos_glm.x, mouse_pos_glm.y);
+
             io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
             io.AddMousePosEvent(mouse_pos.x, mouse_pos.y);
             return true;

@@ -14,6 +14,16 @@ FetchContent_Declare(SDL3
 )
 FetchContent_MakeAvailable(SDL3)
 
+FetchContent_Declare(glm
+    GIT_REPOSITORY
+        https://github.com/bostick/glm.git
+    GIT_TAG
+        1.0.3
+    GIT_SHALLOW 1
+    GIT_PROGRESS 1
+)
+FetchContent_MakeAvailable(glm)
+
 FetchContent_Declare(common
     GIT_REPOSITORY
         https://github.com/bostick/common.git
@@ -45,6 +55,7 @@ target_link_libraries(imgui-lib
     PRIVATE
         SDL3::SDL3-static
         GLESv3
+        glm::glm
         common-lib
 )
 
