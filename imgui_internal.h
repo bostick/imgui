@@ -261,7 +261,7 @@ extern IMGUI_API ImGuiContext* GImGui;  // Current implicit context pointer
 #ifdef IMGUI_DEBUG_PARANOID
 #define IM_ASSERT_PARANOID(_EXPR)       IM_ASSERT(_EXPR)
 #else
-#define IM_ASSERT_PARANOID(_EXPR)
+#define IM_ASSERT_PARANOID(_EXPR)       do {} while(false)
 #endif
 
 // Misc Macros
@@ -301,7 +301,7 @@ extern IMGUI_API ImGuiContext* GImGui;  // Current implicit context pointer
 #if defined(_MSC_VER) && !defined(__clang__)
 #define IM_MSVC_WARNING_SUPPRESS(XXXX)  __pragma(warning(suppress: XXXX))
 #else
-#define IM_MSVC_WARNING_SUPPRESS(XXXX)
+#define IM_MSVC_WARNING_SUPPRESS(XXXX)      do {} while(false)
 #endif
 
 // Debug Tools
