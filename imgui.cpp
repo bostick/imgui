@@ -7743,8 +7743,8 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         ImRect viewport_work_rect(viewport->GetWorkRect());
 
         if (ImGuiLandscapeHack_isLandscape) {
-            viewport_rect.Max = {viewport_rect.Max.y, viewport_rect.Max.x};
-            viewport_work_rect.Max = {viewport_work_rect.Max.y, viewport_work_rect.Max.x};
+            viewport_rect.Max = { viewport_rect.Max.y, viewport_rect.Max.x };
+            viewport_work_rect.Max = { viewport_work_rect.Max.y, viewport_work_rect.Max.x };
         }
 
         ImVec2 visibility_padding = ImMax(style.DisplayWindowPadding, style.DisplaySafeAreaPadding);
