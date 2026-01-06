@@ -107,7 +107,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#undef NDEBUG
+
 #include "common/abort.h"
+#include "common/logging.h"
 
 
 #define TAG "imgui_impl_sdl3"
