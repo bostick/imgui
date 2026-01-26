@@ -15,7 +15,7 @@ FetchContent_Declare(glm
     GIT_REPOSITORY
         https://github.com/bostick/glm.git
     GIT_TAG
-        1.0.1
+        1.0.3
     GIT_SHALLOW 1
     GIT_PROGRESS 1
 )
