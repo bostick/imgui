@@ -16288,7 +16288,7 @@ static bool Platform_OpenInShellFn_DefaultImpl(ImGuiContext*, const char* path)
 #endif
 #else
 static bool Platform_OpenInShellFn_DefaultImpl(ImGuiContext*, const char*) { return false; }
-#endif // Default shell handlers
+#endif // IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS
 
 //-----------------------------------------------------------------------------
 
