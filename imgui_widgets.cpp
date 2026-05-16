@@ -1555,11 +1555,11 @@ bool ImGui::TextLink(const char* label)
         // as we are currently experimenting/planning a different styling system.
         float h, s, v;
         ColorConvertRGBtoHSV(text_colf.x, text_colf.y, text_colf.z, h, s, v);
-        if (held || hovered)
-        {
-            v = ImSaturate(v + (held ? 0.4f : 0.3f));
-            h = ImFmod(h + 0.02f, 1.0f);
-        }
+//        if (held || hovered)
+//        {
+//            v = ImSaturate(v + (held ? 0.4f : 0.3f));
+//            h = ImFmod(h + 0.02f, 1.0f);
+//        }
         ColorConvertHSVtoRGB(h, s, v, text_colf.x, text_colf.y, text_colf.z);
         v = ImSaturate(v - 0.20f);
         ColorConvertHSVtoRGB(h, s, v, line_colf.x, line_colf.y, line_colf.z);
