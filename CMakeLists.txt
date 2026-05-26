@@ -8,7 +8,7 @@ FetchContent_Declare(SDL3
     GIT_REPOSITORY
         https://github.com/bostick/box2d.git
     GIT_TAG
-        bostick-main
+        milestone-6-branch
     GIT_SHALLOW 1
     GIT_PROGRESS 1
 )
@@ -28,7 +28,7 @@ FetchContent_Declare(common
     GIT_REPOSITORY
         https://github.com/bostick/common.git
     GIT_TAG
-        main
+        b0.6
     GIT_SHALLOW 1
     GIT_PROGRESS 1
 )
