@@ -46,21 +46,8 @@ set(SOURCES_LIB
     imgui_tables.cpp
 
     backends/imgui_impl_sdl3.cpp
+    backends/imgui_impl_sdlrenderer3.cpp
 )
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-
-list(APPEND SOURCES_LIB
-    backends/imgui_impl_opengl3.cpp
-)
-
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-
-list(APPEND SOURCES_LIB
-    backends/imgui_impl_metal.mm
-)
-
-endif()
 
 
 add_library(imgui-lib STATIC
@@ -80,15 +67,6 @@ target_link_libraries(imgui-lib
         SDL3::SDL3-static
         common-lib
 )
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-
-target_link_libraries(imgui-lib
-    PRIVATE
-        GLESv3
-)
-
-endif()
 
 
 set_target_properties(imgui-lib
