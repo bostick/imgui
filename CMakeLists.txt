@@ -6,7 +6,7 @@ include(FetchContent)
 
 FetchContent_Declare(SDL3
     GIT_REPOSITORY
-        https://github.com/bostick/box2d.git
+        https://github.com/bostick/SDL.git
     GIT_TAG
         bostick-main
     GIT_SHALLOW 1
